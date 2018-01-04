@@ -4,10 +4,12 @@ let the_number_is = function(i, expression) {
     if (i === 0 || expression[i - 1] !== "*")
         number = 1;
     else if (regex_number.test(expression[i - 2]))
-        if (expression[i - 3] === "-")
+        if (expression[i - 3] === "-") {
             number = expression[i - 2] * -1;
-        else
+        }
+        else {
             number = expression[i - 2];
+        }
     else
         console.log("Je n'ai pas pu trouver le nombre désolé");
     return (number);
@@ -118,14 +120,29 @@ let regex_test = function(i, expression, abc){
         abc[2] = the_number_is(i, expression);
 }
 
+let find_solution_degree_0 = function(expression) {
+    let regex_0 = /^X\^0$/;
+
+    for (let i = 0; expression && expression[i] !== "="; i++) {
+        if (regex_0.test(expression[i])) {
+            if (the_number_is(i, expression) === 0)
+                return ("Toute les solutions sont possibles");
+            else
+                return (the_sign_is(i, expression) === "+" ? the_number_is(i, expression) * -1 : the_number_is(i, expression));
+        }
+    }
+}
 let find_solution_degree_1 = function(expression) {
     let regex_1 = /^X\^1$/;
 
-    for (let i = 0; expression[i] && expression[i] !== "="; i++) {
+    for (let i = 0; expression && expression[i] !== "="; i++) {
         if (regex_1.test(expression[i])) {
-            return (the_sign_is(i, expression) === "+" ? the_number_is(i, expression) * -1 : the_number_is(i, expression));
+            if (the_number_is(i, expression) === 0)
+                return ("Toute les solutions sont possibles");
+            return (the_number_is(i, expression));
         }
     }
+    return ("Aucune solution n'est possible");
 };
 
 let main = function() {
@@ -153,7 +170,12 @@ let main = function() {
             console.log("Polynomial degree: 3\nThe polynomial degree is stricly greater than 2, I can't solve.");
         else if (abc[0] == undefined) {
             console.log("Polynomial degree: 1\nThe solution is:");
-            console.log(1 / find_solution_degree_1(expression));
+            let result = find_solution_degree_1(expression);
+            let result2 = find_solution_degree_0(expression);
+            if (result !== "Toute les solutions sont possibles" && result !== "Aucune solution n'est possible")
+                console.log(result2 / result);
+            else
+                console.log(result);
         }
         else {
             let delta = abc[1] * abc[1] - 4 * abc[0] * abc[2];
