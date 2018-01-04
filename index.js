@@ -4,12 +4,10 @@ let the_number_is = function(i, expression) {
     if (i === 0 || expression[i - 1] !== "*")
         number = 1;
     else if (regex_number.test(expression[i - 2]))
-        if (expression[i - 3] === "-") {
+        if (expression[i - 3] === "-")
             number = expression[i - 2] * -1;
-        }
-        else {
+        else
             number = expression[i - 2];
-        }
     else
         console.log("Je n'ai pas pu trouver le nombre désolé");
     return (number);
