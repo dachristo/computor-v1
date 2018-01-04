@@ -1,10 +1,13 @@
 let the_number_is = function(i, expression) {
     let number;
-    let regex_number = /^[0-9]*$/;
+    let regex_number = /^[0-9]+,?.?[0-9]*$/;
     if (i === 0 || expression[i - 1] !== "*")
         number = 1;
     else if (regex_number.test(expression[i - 2]))
-        number = expression[i - 2];
+        if (expression[i - 3] === "-")
+            number = expression[i - 2] * -1;
+        else
+            number = expression[i - 2];
     else
         console.log("Je n'ai pas pu trouver le nombre désolé");
     return (number);
@@ -36,6 +39,8 @@ let the_sign_is = function(i, expression) {
 }
 
 let modify_expression = function(number, letter, sign, expression, i_save) {
+    if (expression[i_save] == 0)
+        return ;
     for (let i = 0; expression[i] && expression[i] !== "="; i++) {
         if (regex_find(i, expression) === letter) {
             if (sign === "+") {
@@ -85,29 +90,30 @@ let modify_expression = function(number, letter, sign, expression, i_save) {
         else
             expression.splice(i_save - 3, 3);
     }
-    console.log(expression.join(" "));
+
 }
 
-let regex_test = function(i, expression){
-    let regex_a = /X\^1/;
-    let regex_b = /X\^2/;
+let regex_test = function(i, expression, abc){
+    let regex_a = /X\^2/;
+    let regex_b = /X\^1/;
     let regex_c = /X\^0/;
 
-    if (regex_b.test(expression[i])) {
-        let b = the_number_is(i, expression);
-        console.log("b", b);
-    }
     if (regex_a.test(expression[i])) {
-        let a = the_number_is(i, expression);
-        console.log("a", a);
+        abc[0] = the_number_is(i, expression);
+        console.log("a", abc[0]);
+    }
+    if (regex_b.test(expression[i])) {
+        abc[1] = the_number_is(i, expression);
+        console.log("b", abc[1]);
     }
     if (regex_c.test(expression[i])) {
-        let c = the_number_is(i, expression);
-        console.log("c", c);
+        abc[2] = the_number_is(i, expression);
+        console.log("c", abc[2]);
     }
 }
 
 let main = function() {
+    let abc = [];
     if (process.argv.length < 3)
         console.log("Nombre d'argument insuffisant\nExample : 4 * X^2 + 5 * X^1 + 2 * X^0 = 1 * X^0");
     else if (process.argv.length > 3)
@@ -123,7 +129,20 @@ let main = function() {
             i++;
         }
         for (i = 0; expression[i] && expression[i] !== "="; i++) {
-            regex_test(i, expression);
+            regex_test(i, expression, abc);
+        }
+        console.log(expression.join(" "));
+        let delta = abc[1] * abc[1] - 4 * abc[0] * abc[2];
+        if (delta < 0)
+            console.log("Aucune solution n'est possible");
+        else if (delta === 0) {
+            console.log("Polynomial degree: 1\nThe solution is:")
+            console.log(-abc[1] / 2 * abc[0]);
+        }
+        else if (delta > 0) {
+            console.log("Polynomial degree: 2\nDiscriminant is strictly positive, the two solutions are:");
+            console.log((-abc[1] + Math.sqrt(delta)) / (2 * abc[0]));
+            console.log((-abc[1] - Math.sqrt(delta)) / (2 * abc[0]));
         }
     }
 }
