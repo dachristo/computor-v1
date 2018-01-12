@@ -41,52 +41,87 @@ let the_sign_is = function(i, expression) {
 }
 
 let modify_expression = function(number, letter, sign, expression, i_save) {
+    let find = false;
     if (expression[i_save] == 0)
-        return ;
+        return (i_save);
     if (letter == undefined)
-        return ;
-    for (let i = 0; expression[i] && expression[i] !== "="; i++) {
+        return (i_save);
+    for (let i = 0; expression && expression[i] !== "="; i++) {
+        console.log("boucle ", expression[i], letter);
         if (regex_find(i, expression) === letter) {
+            find = true;
+            console.log("Je gère : ", letter);
             if (sign === "+") {
                 if (i === 0) {
+                    console.log("here1");
                     expression.splice(0, "-");
                     expression.splice(1, number);
                     expression.splice(2, "*");
+                    console.log(expression.join(" "));
                 }
                 else if (expression[i - 1] !== "*") {
+                    console.log("here2");
                     expression[i - 1] = "-";
                     expression.splice(i, number);
                     expression.splice(i + 1, "*");
+                    console.log(expression.join(" "));
                 }
-                else
+                else {
+                    console.log("here3");
+                    console.log("3 : ", expression.join(" "));
                     if (number > expression[i - 2]) {
-                        expression[i - 2] = parseInt(expression[i - 2]) - number * -1;
-                        expression.splice(i - 3, "-");
+                        console.log("here4");
+                        console.log("4 avant", expression.join(" "));
+                        expression[i - 2] = (parseInt(expression[i - 2]) - number) * -1;
+                        if (i < 3) {
+                            expression.splice(0, 0, "-");
+                            i++;
+                        }
+                        else
+                            expression[i - 3] = "-";
+                        console.log("4 apres", expression.join(" "));
                     }
-                    else
+                    else {
+                        console.log("here5");
+                        console.log("5 avant", expression.join(" "));
                         expression[i - 2] = parseInt(expression[i - 2]) - number;
+                        console.log("5 apres", expression.join(" "));
+                    }
+                    console.log("a la fin", expression.join(" "));
+                }
             }
             else if (sign === "-") {
                 if (i === 0) {
+                    console.log("6 avant ", expression.join(" "));
                     epxression.splice(0, number);
                     epxression.splice(1, "*");
+                    console.log("6 apres ", expression.join(" "));
                 }
                 else if (expression[i - 1] !== "*") {
+                    console.log("7 avant ", expression.join(" "));
                     expression.splice(i, number);
                     expression.splice(i + 1, "*");
+                    console.log("7 apres ", expression.join(" "));
                 }
-                else
-                    expression[i - 2] = parseInt(expression[i - 2]) + number;
-                    if (expression[i - 3] === "-" && expression [i - 2] < number)
+                else {
+                    console.log("8 avant ", expression.join(" "));
+                    expression[i - 2] = parseInt(expression[i - 2]) + (number * -1);
+                    console.log("8 apres ", expression.join(" "));
+                    if (expression[i - 3] === "-" && expression [i - 2] < number) {
+                        console.log("8 avant2 ", expression.join(" "));
                         expression [i - 3] = "+";
+                        console.log("8 apres2 ", expression.join(" "));
+                    }
+                }
             }
         }
     }
-    if (number === 1) {
-        expression[i_save] = "0";
+    if (!find) {
+        // TODO : Il faut rajouter a la fin avant le =;
     }
-    else if (number !== 1) {
-        expression[i_save] = "0";
+
+    if (number !== 1) {
+        expression.splice(i_save, 1);
         if (sign === "-")
             expression.splice(i_save - 3, 3);
         else if (sign === "+" && expression[i_save - 3] === "=")
@@ -94,11 +129,12 @@ let modify_expression = function(number, letter, sign, expression, i_save) {
         else
             expression.splice(i_save - 3, 3);
     }
+    return (i_save - 3);
 }
 
 let find_if_degree_3 = function(expression) {
     let regex_3 = /^X\^3$/;
-    for (let i = 0; expression[i] && expression[i] !== "="; i++) {
+    for (let i = 0; expression && expression[i] !== "="; i++) {
         if (regex_3.test(expression[i]))
             return true;
     }
@@ -124,7 +160,7 @@ let find_solution_degree_0 = function(expression) {
     for (let i = 0; expression && expression[i] !== "="; i++) {
         if (regex_0.test(expression[i])) {
             if (the_number_is(i, expression) === 0)
-                return ("Toute les solutions sont possibles");
+                return ("Tous les nombres réels sont solution...");
             else
                 return (the_sign_is(i, expression) === "+" ? the_number_is(i, expression) * -1 : the_number_is(i, expression));
         }
@@ -136,7 +172,7 @@ let find_solution_degree_1 = function(expression) {
     for (let i = 0; expression && expression[i] !== "="; i++) {
         if (regex_1.test(expression[i])) {
             if (the_number_is(i, expression) === 0)
-                return ("Toute les solutions sont possibles");
+                return ("Tous les nombres réels sont solution...");
             return (the_number_is(i, expression));
         }
     }
@@ -155,14 +191,16 @@ let main = function() {
         while (expression[i] !== "=")
             i++;
         let i_save = i++;
-        while (expression[i]) {
-            modify_expression(the_number_is(i, expression), regex_find(i, expression), the_sign_is(i, expression), expression, i);
+        while (i < expression.length) {
+            // console.log("expression " + i + expression[i]);
+            i = modify_expression(the_number_is(i, expression), regex_find(i, expression), the_sign_is(i, expression), expression, i);
             i++;
         }
+        console.log(i, expression.length);
         expression.splice(i_save + 2, expression.length);
-        for (i = 0; expression[i] && expression[i] !== "="; i++) {
+        for (i = 0; expression && expression[i] !== "="; i++)
             regex_test(i, expression, abc);
-        }
+        expression.push("0");
         console.log("Reduced form:", expression.join(" "));
         if (find_if_degree_3(expression))
             console.log("Polynomial degree: 3\nThe polynomial degree is stricly greater than 2, I can't solve.");
@@ -170,8 +208,10 @@ let main = function() {
             console.log("Polynomial degree: 1\nThe solution is:");
             let result = find_solution_degree_1(expression);
             let result2 = find_solution_degree_0(expression);
-            if (result !== "Toute les solutions sont possibles" && result !== "Aucune solution n'est possible")
+            if (result !== "Tous les nombres réels sont solution..." && result !== "Aucune solution n'est possible" && result != 0)
                 console.log(result2 / result);
+            else if (result == 0)
+                console.log("Aucune solution n'est possible");
             else
                 console.log(result);
         }
@@ -181,7 +221,10 @@ let main = function() {
                 console.log("Aucune solution n'est possible");
             else if (delta === 0) {
                 console.log("Polynomial degree: 1\nThe solution is:")
-                console.log(-abc[1] / 2 * abc[0]);
+                if (abc[0] === 0)
+                    console.log("Aucune solution n'est possible");
+                else
+                    console.log(-abc[1] / 2 * abc[0]);
             }
             else if (delta > 0) {
                 console.log("Polynomial degree: 2\nDiscriminant is strictly positive, the two solutions are:");
